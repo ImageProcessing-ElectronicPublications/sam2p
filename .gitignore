@@ -14,14 +14,12 @@ sam2p.xstatic.uncompressed
 *.tmp.ps0
 Makedep
 Makehelp
-bts*.tt?
 config.h
 config.log
 config.status
 ps_tiny
 *.pst
 sam2p_version.h
-allcc.*
 sam2p.yes
 sam2p.no
 darwin_libgcc/
