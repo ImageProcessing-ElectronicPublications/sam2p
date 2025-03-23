@@ -1455,56 +1455,57 @@ void MiniPS::dumpScale(GenBuffer::Writable &out, VALUE v)
 void MiniPS::dumpAdd3(GenBuffer::Writable &out, MiniPS::VALUE m, MiniPS::VALUE a, MiniPS::VALUE b, MiniPS::VALUE c, MiniPS::VALUE sub, unsigned rounding)
 {
     long ll;
-    /* Sat Sep  7 15:30:28 CEST 2002 */
-    bool no_real_real=true;
-    double d=0, dd;
-    long l=0;
-    if ((getType(m)==T_REAL && (isEq(m, 72) || isEq(m, -72))) || /* Imp: not so exact comparison */
-            (getType(m)==T_INTEGER && isEq(m, -72)))
+    /* Sun, 23 Mar 2025 20:28:35 +0300 */
+    bool no_real_real = true;
+    double d = 0, dd;
+    long l = 0;
+    if (((getType(m) == T_REAL) && (isEq(m, 72) || isEq(m, -72))) || /* Imp: not so exact comparison */
+            ((getType(m)==T_INTEGER) && isEq(m, -72)))
         m = Qinteger(72);
     MiniPS::VALUE t[5], *tt;
-    t[0]=a;
-    t[1]=m;
-    t[2]=b;
-    t[3]=c;
-    t[4]=sub;
-    for (tt=t; tt<t+5; tt++) switch (getType(*tt))
+    t[0] = a;
+    t[1] = m;
+    t[2] = b;
+    t[3] = c;
+    t[4] = sub;
+    for (tt = t; tt < (t + 5); tt++)
+        switch (getType(*tt))
         {
         case T_REAL:
-            dd=RREAL(*tt)->getBp();
+            dd = RREAL(*tt)->getBp();
 doadd:
             if (no_real_real)
             {
-                d=l;
-                no_real_real=false;
+                d = l;
+                no_real_real = false;
             }
-            if (tt==t+1)   /* multiply by m/72 or 72/-m */
+            if (tt == (t + 1))   /* multiply by m/72 or 72/-m */
             {
-                if (dd==0.0 || d==0.0)
+                if ((dd == 0.0) || (d == 0.0))
                 {
-                    no_real_real=true;
-                    l=0;
-                    d=0.0;
+                    no_real_real = true;
+                    l = 0;
+                    d = 0.0;
                 }
-                else d *= dd >= 0 ? dd / 72 : 72 / -dd;
+                else d *= (dd >= 0) ? (dd / 72) : (72 / -dd);
             }
-            else if (tt==t+4) d-=dd;
-            else d+=dd;
+            else if (tt == (t + 4)) d -= dd;
+            else d += dd;
             break;
         case T_INTEGER:
-            ll=int2ii(*tt);
-            if (tt==t+1)   /* multiply by m/72 or 72/-m */
+            ll = int2ii(*tt);
+            if (tt == (t + 1))   /* multiply by m/72 or 72/-m */
             {
-                if (ll >= 0 && ll % 72 == 0) l *= ll / 72;
-                else if (ll < 0 && 72 % -ll == 0) l *= 72 / -ll;
+                if ((ll >= 0) && ((ll % 72) == 0)) l *= ll / 72;
+                else if ((ll < 0) && ((72 % -ll) == 0)) l *= 72 / -ll;
                 else
                 {
-                    dd=ll;
+                    dd = ll;
                     goto doadd;
                 }
             }
-            else if (tt==t+4) l-=ll;
-            else l+=ll;
+            else if (tt == (t + 4)) l -= ll;
+            else l += ll;
             break;
         default:
             Error::sev(Error::EERROR) << "dumpAdd3: numbers expected" << (Error*)0;
@@ -1514,19 +1515,18 @@ doadd:
         out << l;
         return;
     }
-    if (rounding!=0)
+    if (rounding != 0)
     {
-        ll=(long)d;
-        if ((double)ll<d) ll++;
-        assert((double)ll>=d); /* Imp: verify possible rounding errors */
-        out << (rounding>=2 && ll<0 ? 0 : ll);
+        dd = d * 100.0;
+        ll = (long) dd;
+        if ((double) ll < dd) ll++;
+        assert((double) ll >= dd); /* Imp: verify possible rounding errors */
+        // out << ((rounding >= 2) && (ll < 0) ? 0 : ll); // for integer
+        d = (double) ll * 0.01;
     }
-    else
-    {
-        char buf[64]; /* Dat: enough */
-        sprintf(buf, "%" PTS_CFG_PRINTFGLEN "g", d);
-        out << buf;
-    }
+    char buf[64]; /* Dat: enough */
+    sprintf(buf, "%" PTS_CFG_PRINTFGLEN "g", d);
+    out << buf;
 }
 
 /* __END__ */
