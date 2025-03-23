@@ -40,43 +40,43 @@
 
 typedef struct _PNMScanner
 {
-  PNMFILE   *fd;		      /* The file descriptor of the file being read */
-  char   cur;		      /* The current character in the input stream */
-  int    eof;		      /* Have we reached end of file? */
+    PNMFILE   *fd;		      /* The file descriptor of the file being read */
+    char   cur;		      /* The current character in the input stream */
+    int    eof;		      /* Have we reached end of file? */
 } PNMScanner;
 
 typedef struct _PNMInfo
 {
-  unsigned int       xres, yres;	/* The size of the image */
-  int       maxval;		/* For ascii image files, the max value
+    unsigned int       xres, yres;	/* The size of the image */
+    int       maxval;		/* For ascii image files, the max value
 				 * which we need to normalize to */
-  int       np;		/* Number of image planes (0 for pbm) */
-  int       asciibody;		/* 1 if ascii body, 0 if raw body */
-  /* Routine to use to load the pnm body */
-  void    (* loader) (PNMScanner *, struct _PNMInfo *, unsigned char *);
+    int       np;		/* Number of image planes (0 for pbm) */
+    int       asciibody;		/* 1 if ascii body, 0 if raw body */
+    /* Routine to use to load the pnm body */
+    void    (* loader) (PNMScanner *, struct _PNMInfo *, unsigned char *);
 } PNMInfo;
 
 /* Contains the information needed to write out PNM rows */
 typedef struct _PNMRowInfo
 {
-  PNMFILE   *fd;		/* File descriptor */
-  char  *rowbuf;	/* Buffer for writing out rows */
-  int    xres;		/* X resolution */
-  int    np;		/* Number of planes */
-  unsigned char *red;		/* Colormap red */
-  unsigned char *grn;		/* Colormap green */
-  unsigned char *blu;		/* Colormap blue */
+    PNMFILE   *fd;		/* File descriptor */
+    char  *rowbuf;	/* Buffer for writing out rows */
+    int    xres;		/* X resolution */
+    int    np;		/* Number of planes */
+    unsigned char *red;		/* Colormap red */
+    unsigned char *grn;		/* Colormap green */
+    unsigned char *blu;		/* Colormap blue */
 } PNMRowInfo;
 
 /* Save info  */
 typedef struct
 {
-  int  raw;  /*  raw or ascii  */
+    int  raw;  /*  raw or ascii  */
 } PNMSaveVals;
 
 typedef struct
 {
-  int  run;  /*  run  */
+    int  run;  /*  run  */
 } PNMSaveInterface;
 
 #define PNM_BUFLEN 512		/* The input buffer size for data returned
@@ -91,26 +91,26 @@ typedef struct
  */
 
 static void   pnm_load_ascii           (PNMScanner *scan,
-					PNMInfo    *info,
-					unsigned char  *pixel_rgn);
+                                        PNMInfo    *info,
+                                        unsigned char  *pixel_rgn);
 static void   pnm_load_raw             (PNMScanner *scan,
-					PNMInfo    *info,
-					unsigned char  *pixel_rgn);
+                                        PNMInfo    *info,
+                                        unsigned char  *pixel_rgn);
 static void   pnm_load_rawpbm          (PNMScanner *scan,
-					PNMInfo    *info,
-					unsigned char  *pixel_rgn);
+                                        PNMInfo    *info,
+                                        unsigned char  *pixel_rgn);
 
 static void   pnmscanner_destroy       (PNMScanner *s);
 #if 0
 static void   pnmscanner_createbuffer  (PNMScanner *s,
-					unsigned int bufsize);
+                                        unsigned int bufsize);
 static void   pnmscanner_getchar       (PNMScanner *s);
 static void   pnmscanner_getsmalltoken (PNMScanner *s, unsigned char *buf);
 #endif
 static void   pnmscanner_eatwhitespace (PNMScanner *s);
 static void   pnmscanner_gettoken      (PNMScanner *s,
-					unsigned char *buf,
-					unsigned int bufsize);
+                                        unsigned char *buf,
+                                        unsigned int bufsize);
 static unsigned pnmscanner_getint(PNMScanner *s);
 
 static PNMScanner * pnmscanner_create  (PNMFILE *fd);
@@ -126,20 +126,20 @@ static PNMScanner * pnmscanner_create  (PNMFILE *fd);
 static void
 pnmscanner_getchar (PNMScanner *s)
 {
-  if (s->inbuf)
+    if (s->inbuf)
     {
-      s->cur = s->inbuf[s->inbufpos++];
-      if (s->inbufpos >= s->inbufvalidsize)
-	{
-	  if (s->inbufsize > s->inbufvalidsize)
-	    s->eof = 1;
-	  else
-	    s->inbufvalidsize = fread(s->inbuf, 1, s->inbufsize, s->fd);
-	  s->inbufpos = 0;
-	}
+        s->cur = s->inbuf[s->inbufpos++];
+        if (s->inbufpos >= s->inbufvalidsize)
+        {
+            if (s->inbufsize > s->inbufvalidsize)
+                s->eof = 1;
+            else
+                s->inbufvalidsize = fread(s->inbuf, 1, s->inbufsize, s->fd);
+            s->inbufpos = 0;
+        }
     }
-  else
-    s->eof = !fread(&(s->cur), 1, 1, s->fd);
+    else
+        s->eof = !fread(&(s->cur), 1, 1, s->fd);
 }
 #endif
 
@@ -149,47 +149,55 @@ pnmscanner_getchar (PNMScanner *s)
  *    Eats up whitespace from the input and returns when done or eof.
  *    Also deals with comments.
  */
-static inline void pnmscanner_eatwhitespace(PNMScanner *s) { /**** pts ****/
-  while (1) {
-    if (s->cur=='#') {
-      do pnmscanner_getchar(s); while (s->cur != '\n' && !s->eof);
-      if (s->eof) break;
-    } else if (!isspace(s->cur)) {
-      break;
+static inline void pnmscanner_eatwhitespace(PNMScanner *s)   /**** pts ****/
+{
+    while (1)
+    {
+        if (s->cur=='#')
+        {
+            do pnmscanner_getchar(s);
+            while (s->cur != '\n' && !s->eof);
+            if (s->eof) break;
+        }
+        else if (!isspace(s->cur))
+        {
+            break;
+        }
+        pnmscanner_getchar(s);
     }
-    pnmscanner_getchar(s);
-  }
 }
 
 
 static struct struct_pnm_types
 {
-  char   name;
-  int    np;
-  int    asciibody;
-  int    maxval;
-  void (* loader) (PNMScanner *, struct _PNMInfo *, unsigned char *pixel_rgn);
+    char   name;
+    int    np;
+    int    asciibody;
+    int    maxval;
+    void (* loader) (PNMScanner *, struct _PNMInfo *, unsigned char *pixel_rgn);
 } pnm_types[] =
 {
-  { '1', 0, 1,   1, pnm_load_ascii },  /* ASCII PBM */
-  { '2', 1, 1, 255, pnm_load_ascii },  /* ASCII PGM */
-  { '3', 3, 1, 255, pnm_load_ascii },  /* ASCII PPM */
-  { '4', 0, 0,   1, pnm_load_rawpbm }, /* RAW   PBM */
-  { '5', 1, 0, 255, pnm_load_raw },    /* RAW   PGM */
-  { '6', 3, 0, 255, pnm_load_raw },    /* RAW   PPM */
-  {  0 , 0, 0,   0, NULL}
+    { '1', 0, 1,   1, pnm_load_ascii },  /* ASCII PBM */
+    { '2', 1, 1, 255, pnm_load_ascii },  /* ASCII PGM */
+    { '3', 3, 1, 255, pnm_load_ascii },  /* ASCII PPM */
+    { '4', 0, 0,   1, pnm_load_rawpbm }, /* RAW   PBM */
+    { '5', 1, 0, 255, pnm_load_raw },    /* RAW   PGM */
+    { '6', 3, 0, 255, pnm_load_raw },    /* RAW   PPM */
+    {  0, 0, 0,   0, NULL}
 };
 
-static slen_t multiply_check(slen_t a, slen_t b) {
-  slen_t result;
-  if (a == 0) return 0;
-  /* Check for overflow. Works only if everything is unsigned. */
-  if ((result = a * b) / a != b) FATALP("PNM: Image too large.");
-  return result;
+static slen_t multiply_check(slen_t a, slen_t b)
+{
+    slen_t result;
+    if (a == 0) return 0;
+    /* Check for overflow. Works only if everything is unsigned. */
+    if ((result = a * b) / a != b) FATALP("PNM: Image too large.");
+    return result;
 }
 
-static slen_t multiply_check(slen_t a, slen_t b, slen_t c) {
-  return multiply_check(multiply_check(a, b), c);
+static slen_t multiply_check(slen_t a, slen_t b, slen_t c)
+{
+    return multiply_check(multiply_check(a, b), c);
 }
 
 #if PTS_SAM2P
@@ -198,246 +206,261 @@ bitmap_type pnm_load_image (PNMFILE* filename)
 bitmap_type pnm_load_image (at_string filename)
 #endif
 {
-  char buf[PNM_BUFLEN];		/* buffer for random things like scanning */
-  PNMInfo *pnminfo;
-  PNMScanner * volatile scan;
-  int ctr;
-  PNMFILE* fd;
-  bitmap_type bitmap;
+    char buf[PNM_BUFLEN];		/* buffer for random things like scanning */
+    PNMInfo *pnminfo;
+    PNMScanner * volatile scan;
+    int ctr;
+    PNMFILE* fd;
+    bitmap_type bitmap;
 
-  #if PTS_SAM2P /**** pts ****/
+#if PTS_SAM2P /**** pts ****/
     fd=filename;
-  #else
-  /* open the file */
-  fd = xfopen (filename, "rb");
-  if (fd == NULL)
+#else
+    /* open the file */
+    fd = xfopen (filename, "rb");
+    if (fd == NULL)
     {
-      FATAL("PNM: can't open file");
-      BITMAP_BITS (bitmap) = NULL;
-      BITMAP_WIDTH (bitmap) = 0;
-      BITMAP_HEIGHT (bitmap) = 0;
-      BITMAP_PLANES (bitmap) = 0;
-      return (bitmap);
+        FATAL("PNM: can't open file");
+        BITMAP_BITS (bitmap) = NULL;
+        BITMAP_WIDTH (bitmap) = 0;
+        BITMAP_HEIGHT (bitmap) = 0;
+        BITMAP_PLANES (bitmap) = 0;
+        return (bitmap);
     }
-  #endif
+#endif
 
 
-  /* allocate the necessary structures */
-  /* pnminfo = (PNMInfo *) malloc (sizeof (PNMInfo)); */
-  XMALLOCT(pnminfo, PNMInfo*, sizeof(PNMInfo));
+    /* allocate the necessary structures */
+    /* pnminfo = (PNMInfo *) malloc (sizeof (PNMInfo)); */
+    XMALLOCT(pnminfo, PNMInfo*, sizeof(PNMInfo));
 
-  scan = NULL;
-  /* set error handling */
+    scan = NULL;
+    /* set error handling */
 
-  scan = pnmscanner_create(fd);
+    scan = pnmscanner_create(fd);
 
-  /* Get magic number */
-  pnmscanner_gettoken (scan, (unsigned char *)buf, PNM_BUFLEN);
-  if (pnmscanner_eof(scan))
-    FATALP ("PNM: premature end of file");
-  if (buf[0] != 'P' || buf[2])
-    FATALP ("PNM: is not a valid file");
-
-  /* Look up magic number to see what type of PNM this is */
-  pnminfo->loader = NULL;
-  for (ctr=0; pnm_types[ctr].name; ctr++)
-    if (buf[1] == pnm_types[ctr].name)
-      {
-	pnminfo->np        = pnm_types[ctr].np;
-	pnminfo->asciibody = pnm_types[ctr].asciibody;
-	pnminfo->maxval    = pnm_types[ctr].maxval;
-	pnminfo->loader    = pnm_types[ctr].loader;
-	break;
-      }
-  if (!pnminfo->loader)
-      FATALP ("PNM: file not in a supported format");
-
-  pnmscanner_gettoken(scan, (unsigned char *)buf, PNM_BUFLEN);
-  if (pnmscanner_eof(scan))
-    FATALP ("PNM: premature end of file");
-  pnminfo->xres = isdigit(*buf)?atoi(buf):0;
-  if (pnminfo->xres+1U<=1U)
-    FATALP ("PNM: invalid xres while loading");
-
-  pnmscanner_gettoken(scan, (unsigned char *)buf, PNM_BUFLEN);
-  if (pnmscanner_eof(scan))
-    FATALP ("PNM: premature end of file");
-  pnminfo->yres = isdigit(*buf)?atoi(buf):0;
-  if (pnminfo->yres+1U<=1U)
-    FATALP ("PNM: invalid yres while loading");
-
-  if (pnminfo->np != 0)		/* pbm's don't have a maxval field */
-    {
-      pnmscanner_gettoken(scan, (unsigned char *)buf, PNM_BUFLEN);
-      if (pnmscanner_eof(scan))
+    /* Get magic number */
+    pnmscanner_gettoken (scan, (unsigned char *)buf, PNM_BUFLEN);
+    if (pnmscanner_eof(scan))
         FATALP ("PNM: premature end of file");
+    if (buf[0] != 'P' || buf[2])
+        FATALP ("PNM: is not a valid file");
 
-      pnminfo->maxval = isdigit(*buf)?atoi(buf):0;
-      if ((pnminfo->maxval<=0)
-		|| (pnminfo->maxval>255 && !pnminfo->asciibody))
-        FATALP ("PNM: invalid maxval while loading");
+    /* Look up magic number to see what type of PNM this is */
+    pnminfo->loader = NULL;
+    for (ctr=0; pnm_types[ctr].name; ctr++)
+        if (buf[1] == pnm_types[ctr].name)
+        {
+            pnminfo->np        = pnm_types[ctr].np;
+            pnminfo->asciibody = pnm_types[ctr].asciibody;
+            pnminfo->maxval    = pnm_types[ctr].maxval;
+            pnminfo->loader    = pnm_types[ctr].loader;
+            break;
+        }
+    if (!pnminfo->loader)
+        FATALP ("PNM: file not in a supported format");
+
+    pnmscanner_gettoken(scan, (unsigned char *)buf, PNM_BUFLEN);
+    if (pnmscanner_eof(scan))
+        FATALP ("PNM: premature end of file");
+    pnminfo->xres = isdigit(*buf)?atoi(buf):0;
+    if (pnminfo->xres+1U<=1U)
+        FATALP ("PNM: invalid xres while loading");
+
+    pnmscanner_gettoken(scan, (unsigned char *)buf, PNM_BUFLEN);
+    if (pnmscanner_eof(scan))
+        FATALP ("PNM: premature end of file");
+    pnminfo->yres = isdigit(*buf)?atoi(buf):0;
+    if (pnminfo->yres+1U<=1U)
+        FATALP ("PNM: invalid yres while loading");
+
+    if (pnminfo->np != 0)		/* pbm's don't have a maxval field */
+    {
+        pnmscanner_gettoken(scan, (unsigned char *)buf, PNM_BUFLEN);
+        if (pnmscanner_eof(scan))
+            FATALP ("PNM: premature end of file");
+
+        pnminfo->maxval = isdigit(*buf)?atoi(buf):0;
+        if ((pnminfo->maxval<=0)
+                || (pnminfo->maxval>255 && !pnminfo->asciibody))
+            FATALP ("PNM: invalid maxval while loading");
     }
 
-  BITMAP_WIDTH (bitmap) = (at_dimen_t) pnminfo->xres;
-  BITMAP_HEIGHT (bitmap) = (at_dimen_t) pnminfo->yres;
+    BITMAP_WIDTH (bitmap) = (at_dimen_t) pnminfo->xres;
+    BITMAP_HEIGHT (bitmap) = (at_dimen_t) pnminfo->yres;
 
-  BITMAP_PLANES (bitmap) = (pnminfo->np)?(pnminfo->np):1;
-  /* BITMAP_BITS (bitmap) = (unsigned char *) malloc ((slen_t)pnminfo->yres * pnminfo->xres * BITMAP_PLANES (bitmap)); */
-  XMALLOCT(BITMAP_BITS (bitmap), unsigned char *, multiply_check(pnminfo->yres, pnminfo->xres, BITMAP_PLANES (bitmap)));
-  pnminfo->loader (scan, pnminfo, BITMAP_BITS (bitmap));
-  /* vvv Dat: We detect truncation late truncated files will just have garbage :-( */
-  if (pnmscanner_eof(scan))
-    FATALP ("PNM: truncated image data");
+    BITMAP_PLANES (bitmap) = (pnminfo->np)?(pnminfo->np):1;
+    /* BITMAP_BITS (bitmap) = (unsigned char *) malloc ((slen_t)pnminfo->yres * pnminfo->xres * BITMAP_PLANES (bitmap)); */
+    XMALLOCT(BITMAP_BITS (bitmap), unsigned char *, multiply_check(pnminfo->yres, pnminfo->xres, BITMAP_PLANES (bitmap)));
+    pnminfo->loader (scan, pnminfo, BITMAP_BITS (bitmap));
+    /* vvv Dat: We detect truncation late truncated files will just have garbage :-( */
+    if (pnmscanner_eof(scan))
+        FATALP ("PNM: truncated image data");
 
-  /* Destroy the scanner */
-  pnmscanner_destroy (scan);
+    /* Destroy the scanner */
+    pnmscanner_destroy (scan);
 
-  /* free the structures */
-  /* free (pnminfo); */
-  XFREE(pnminfo);
+    /* free the structures */
+    /* free (pnminfo); */
+    XFREE(pnminfo);
 
-  /* close the file */
-  /* xfclose (fd, filename); */
+    /* close the file */
+    /* xfclose (fd, filename); */
 
-  return (bitmap);
+    return (bitmap);
 }
 
 static void
 pnm_load_ascii (PNMScanner *scan,
-		PNMInfo    *info,
-		unsigned char *data)
+                PNMInfo    *info,
+                unsigned char *data)
 {
-  register unsigned char *d, *dend;
-  unsigned u, s;
-  #if 0 /**** pts ****/
+    register unsigned char *d, *dend;
+    unsigned u, s;
+#if 0 /**** pts ****/
     /* Buffer reads to increase performance */
     /* !! convert(1) is faster -- maybe buffering helps? */
     pnmscanner_createbuffer(scan, 4096);
-  #endif
-  d = data;
-  if (info->np==0) { /* PBM */
-    dend=d+(slen_t)info->xres*info->yres;
-    while (d!=dend) {
-      /* pnmscanner_getsmalltoken(scan, (unsigned char *)buf); */
-      pnmscanner_eatwhitespace(scan);
-      *d++=-(scan->cur=='0');
-      pnmscanner_getchar(scan);
+#endif
+    d = data;
+    if (info->np==0)   /* PBM */
+    {
+        dend=d+(slen_t)info->xres*info->yres;
+        while (d!=dend)
+        {
+            /* pnmscanner_getsmalltoken(scan, (unsigned char *)buf); */
+            pnmscanner_eatwhitespace(scan);
+            *d++=-(scan->cur=='0');
+            pnmscanner_getchar(scan);
+        }
     }
-  } else { /* PGM or PPM */ /**** pts ****/
-    dend=d+(slen_t)info->xres*info->yres*info->np;
-    switch (s=info->maxval) {
-     case 255:
-      while (d!=dend) {
-        *d++=pnmscanner_getint(scan); /* Dat: removed isdigit() */
-      }
-      break;
-     case 15:
-      while (d!=dend) {
-        *d++ = pnmscanner_getint(scan)*17;
-      }
-      break;
-     case 3:
-      while (d!=dend) {
-        *d++ = pnmscanner_getint(scan)*85;
-      }
-      break;
-     case 0: /* avoid division by 0 */
-     case 1:
-      while (d!=dend) {
-        *d++ = -(0==pnmscanner_getint(scan)); /* (*buf=='0')?0xff:0x00; */
-      }
-     default:
-      while (d!=dend) {
-	u=pnmscanner_getint(scan);
-	*d++ = (0UL+u*255UL+(s>>1))/s; /* always <= 255 */
-      }
+    else
+    {
+        /* PGM or PPM */ /**** pts ****/
+        dend=d+(slen_t)info->xres*info->yres*info->np;
+        switch (s=info->maxval)
+        {
+        case 255:
+            while (d!=dend)
+            {
+                *d++=pnmscanner_getint(scan); /* Dat: removed isdigit() */
+            }
+            break;
+        case 15:
+            while (d!=dend)
+            {
+                *d++ = pnmscanner_getint(scan)*17;
+            }
+            break;
+        case 3:
+            while (d!=dend)
+            {
+                *d++ = pnmscanner_getint(scan)*85;
+            }
+            break;
+        case 0: /* avoid division by 0 */
+        case 1:
+            while (d!=dend)
+            {
+                *d++ = -(0==pnmscanner_getint(scan)); /* (*buf=='0')?0xff:0x00; */
+            }
+        default:
+            while (d!=dend)
+            {
+                u=pnmscanner_getint(scan);
+                *d++ = (0UL+u*255UL+(s>>1))/s; /* always <= 255 */
+            }
+        }
     }
-  }
 }
 
 static void
 pnm_load_raw (PNMScanner *scan,
-	      PNMInfo    *info,
-	      unsigned char  *data)
+              PNMInfo    *info,
+              unsigned char  *data)
 {
-  unsigned char *d, *dend;
-  unsigned s=info->maxval;
-  slen_t delta, scanlines;
-  PNMFILE *fd=pnmscanner_fd(scan);
+    unsigned char *d, *dend;
+    unsigned s=info->maxval;
+    slen_t delta, scanlines;
+    PNMFILE *fd=pnmscanner_fd(scan);
 
-  scanlines = info->yres;
-  d = data;
-  delta=(slen_t)info->xres * info->np;
-  dend=d+delta*scanlines;
-  while (d!=dend) {
-    if (delta != fread_PNMFILE((char*)d, delta, fd)) return;
-    d+=delta;
-  }
-  d=data;
-  switch (s=info->maxval) { /**** pts ****/
-   case 1: case 0:
-    for (; d!=dend; d++) if (*d!=0) *d=255;
-    break;
-   case 3:
-    while (d!=dend) *d++*=85;
-    break;
-   case 15:
-    while (d!=dend) *d++*=17;
-    break;
-   case 255:
-    break;
-   default:
-    for (; d!=dend; d++) *d=(0UL+*d*255UL+(s>>1))/s; /* always <= 255 */
-    break;
-  }
+    scanlines = info->yres;
+    d = data;
+    delta=(slen_t)info->xres * info->np;
+    dend=d+delta*scanlines;
+    while (d!=dend)
+    {
+        if (delta != fread_PNMFILE((char*)d, delta, fd)) return;
+        d+=delta;
+    }
+    d=data;
+    switch (s=info->maxval)   /**** pts ****/
+    {
+    case 1:
+    case 0:
+        for (; d!=dend; d++) if (*d!=0) *d=255;
+        break;
+    case 3:
+        while (d!=dend) *d++*=85;
+        break;
+    case 15:
+        while (d!=dend) *d++*=17;
+        break;
+    case 255:
+        break;
+    default:
+        for (; d!=dend; d++) *d=(0UL+*d*255UL+(s>>1))/s; /* always <= 255 */
+        break;
+    }
 }
 
 static void
 pnm_load_rawpbm (PNMScanner *scan,
-		 PNMInfo    *info,
-		 unsigned char  *data)
+                 PNMInfo    *info,
+                 unsigned char  *data)
 {
-  unsigned char *buf;
-  unsigned char  curbyte;
-  unsigned char *d;
-  unsigned int   x, i;
-  unsigned int   start, end, scanlines;
-  PNMFILE          *fd;
-  unsigned int            rowlen, bufpos;
+    unsigned char *buf;
+    unsigned char  curbyte;
+    unsigned char *d;
+    unsigned int   x, i;
+    unsigned int   start, end, scanlines;
+    PNMFILE          *fd;
+    unsigned int            rowlen, bufpos;
 
-  fd = pnmscanner_fd(scan);
-  /****pts****/ /* rowlen = (unsigned int)ceil((double)(info->xres)/8.0);*/
-  rowlen = (info->xres >> 3) + (info->xres & 7 ? 1 : 0);
-  /* buf = (unsigned char *)malloc(rowlen*sizeof(unsigned char)); */
-  XMALLOCT(buf, unsigned char*, rowlen*sizeof(unsigned char));
+    fd = pnmscanner_fd(scan);
+    /****pts****/ /* rowlen = (unsigned int)ceil((double)(info->xres)/8.0);*/
+    rowlen = (info->xres >> 3) + (info->xres & 7 ? 1 : 0);
+    /* buf = (unsigned char *)malloc(rowlen*sizeof(unsigned char)); */
+    XMALLOCT(buf, unsigned char*, rowlen*sizeof(unsigned char));
 
-      start = 0;
-      end = info->yres;
-      scanlines = end - start;
-      d = data;
+    start = 0;
+    end = info->yres;
+    scanlines = end - start;
+    d = data;
 
-      for (i = 0; i < scanlines; i++)
-	{
-	  if (rowlen != fread_PNMFILE((char*)buf, rowlen, fd))
+    for (i = 0; i < scanlines; i++)
+    {
+        if (rowlen != fread_PNMFILE((char*)buf, rowlen, fd))
             FATALP ("PNM: error reading file");
-	  bufpos = 0;
-	  curbyte = buf[0];
+        bufpos = 0;
+        curbyte = buf[0];
 
-	  for (x = 0; x < info->xres; x++)
-	    {
-	      if ((x % 8) == 0) {
-		curbyte = buf[bufpos++];
-		/* // if (curbyte!=0) printf("%d <%u>\n", x, curbyte); */
-              }
-	      /* // if (curbyte!=0) printf("[%u]\n", curbyte); */
-	      d[x] = (curbyte&0x80) ? 0x00 : 0xff;
-	      curbyte <<= 1;
-	    }
+        for (x = 0; x < info->xres; x++)
+        {
+            if ((x % 8) == 0)
+            {
+                curbyte = buf[bufpos++];
+                /* // if (curbyte!=0) printf("%d <%u>\n", x, curbyte); */
+            }
+            /* // if (curbyte!=0) printf("[%u]\n", curbyte); */
+            d[x] = (curbyte&0x80) ? 0x00 : 0xff;
+            curbyte <<= 1;
+        }
 
-	  d += info->xres;
-	}
+        d += info->xres;
+    }
 
-  XFREE(buf);
+    XFREE(buf);
 }
 
 /**************** FILE SCANNER UTILITIES **************/
@@ -449,12 +472,12 @@ pnm_load_rawpbm (PNMScanner *scan,
 static PNMScanner *
 pnmscanner_create (PNMFILE *fd)
 {
-  PNMScanner *s;
+    PNMScanner *s;
 
-  XMALLOCT (s, PNMScanner*, sizeof(PNMScanner));
-  s->fd = fd;
-  s->eof = !fread_PNMFILE(&(s->cur), 1, s->fd);
-  return s;
+    XMALLOCT (s, PNMScanner*, sizeof(PNMScanner));
+    s->fd = fd;
+    s->eof = !fread_PNMFILE(&(s->cur), 1, s->fd);
+    return s;
 }
 
 /* pnmscanner_destroy ---
@@ -463,7 +486,7 @@ pnmscanner_create (PNMFILE *fd)
 static void
 pnmscanner_destroy (PNMScanner *s)
 {
-  XFREE(s);
+    XFREE(s);
 }
 
 #if 0 /**** pts ****/
@@ -472,13 +495,13 @@ pnmscanner_destroy (PNMScanner *s)
  */
 static void
 pnmscanner_createbuffer (PNMScanner *s,
-			 unsigned int bufsize)
+                         unsigned int bufsize)
 {
-  /* s->inbuf = (char *)malloc(sizeof(char)*bufsize); */
-  XMALLOCT(s->inbuf, char*, sizeof(char)*bufsize);
-  s->inbufsize = bufsize;
-  s->inbufpos = 0;
-  s->inbufvalidsize = fread(s->inbuf, 1, bufsize, s->fd);
+    /* s->inbuf = (char *)malloc(sizeof(char)*bufsize); */
+    XMALLOCT(s->inbuf, char*, sizeof(char)*bufsize);
+    s->inbufsize = bufsize;
+    s->inbufpos = 0;
+    s->inbufvalidsize = fread(s->inbuf, 1, bufsize, s->fd);
 }
 #endif
 
@@ -486,25 +509,28 @@ pnmscanner_createbuffer (PNMScanner *s,
  *    Gets the next token, eating any leading whitespace.
  */
 static void pnmscanner_gettoken (PNMScanner *s,
-		     unsigned char *buf,
-		     unsigned int bufsize)
+                                 unsigned char *buf,
+                                 unsigned int bufsize)
 {
-  unsigned char *bufend=buf+bufsize-1;
-  pnmscanner_eatwhitespace(s);
-  while (!pnmscanner_eof(s) && !isspace(s->cur) && s->cur!='#') {
-    if (buf!=bufend) *buf++=s->cur;
-    pnmscanner_getchar(s);
-  }
-  *buf='\0';
+    unsigned char *bufend=buf+bufsize-1;
+    pnmscanner_eatwhitespace(s);
+    while (!pnmscanner_eof(s) && !isspace(s->cur) && s->cur!='#')
+    {
+        if (buf!=bufend) *buf++=s->cur;
+        pnmscanner_getchar(s);
+    }
+    *buf='\0';
 }
 
-static unsigned pnmscanner_getint(PNMScanner *s) {
-  unsigned ret=0;
-  pnmscanner_eatwhitespace(s);
-  while (!pnmscanner_eof(s)) {
-    if (isdigit(s->cur)) ret=10*ret+s->cur-'0';
-    else if (isspace(s->cur) || s->cur=='#') break;
-    pnmscanner_getchar(s);
-  }
-  return ret;
+static unsigned pnmscanner_getint(PNMScanner *s)
+{
+    unsigned ret=0;
+    pnmscanner_eatwhitespace(s);
+    while (!pnmscanner_eof(s))
+    {
+        if (isdigit(s->cur)) ret=10*ret+s->cur-'0';
+        else if (isspace(s->cur) || s->cur=='#') break;
+        pnmscanner_getchar(s);
+    }
+    return ret;
 }

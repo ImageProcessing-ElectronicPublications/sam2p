@@ -37,51 +37,61 @@
 #undef CGIFFF
 #define CGIFFF CGIF::
 
-static void *xmalloc(size_t size) {
-  void *result = malloc(size + (size == 0));
-  if (!result) Error::sev(Error::EERROR) << "GIF: out of memory" << (Error*)0;
-  return result;
+static void *xmalloc(size_t size)
+{
+    void *result = malloc(size + (size == 0));
+    if (!result) Error::sev(Error::EERROR) << "GIF: out of memory" << (Error*)0;
+    return result;
 }
 
-static void *xrealloc(void *ptr, size_t size) {
-  void *result = realloc(ptr, size + (size == 0));
-  if (!result) Error::sev(Error::EERROR) << "GIF: out of memory" << (Error*)0;
-  return result;
+static void *xrealloc(void *ptr, size_t size)
+{
+    void *result = realloc(ptr, size + (size == 0));
+    if (!result) Error::sev(Error::EERROR) << "GIF: out of memory" << (Error*)0;
+    return result;
 }
 
-static Image::Sampled *in_gif_reader(Image::Loader::UFD *ufd, SimBuffer::Flat const&) {
-  Image::Indexed *img;
-  CGIFFF GifFileType *giff;
-  CGIFFF SavedImage *sp;
-  CGIFFF ColorMapObject *cm;
-  char const *err;
+static Image::Sampled *in_gif_reader(Image::Loader::UFD *ufd, SimBuffer::Flat const&)
+{
+    Image::Indexed *img;
+    CGIFFF GifFileType *giff;
+    CGIFFF SavedImage *sp;
+    CGIFFF ColorMapObject *cm;
+    char const *err;
 
-  /* Dat: (CGIFFF GetGifError() || "unknown error") doesn't work like in Perl or Ruby */
-  if (0==(giff=CGIFFF DGifOpenFILE(((Filter::UngetFILED*)ufd)->getFILE(/*seekable:*/false))) || GIF_ERROR==CGIFFF DGifSlurp(giff))
-    Error::sev(Error::EERROR) << "GIF: " << ((err=CGIFFF GetGifError()) ? err : "unknown error") << (Error*)0;
-  if (giff->ImageCount<1)
-    Error::sev(Error::EERROR) << "GIF: no image in file" << (Error*)0;
+    /* Dat: (CGIFFF GetGifError() || "unknown error") doesn't work like in Perl or Ruby */
+    if (0==(giff=CGIFFF DGifOpenFILE(((Filter::UngetFILED*)ufd)->getFILE(/*seekable:*/false))) || GIF_ERROR==CGIFFF DGifSlurp(giff))
+        Error::sev(Error::EERROR) << "GIF: " << ((err=CGIFFF GetGifError()) ? err : "unknown error") << (Error*)0;
+    if (giff->ImageCount<1)
+        Error::sev(Error::EERROR) << "GIF: no image in file" << (Error*)0;
 
-  sp=giff->SavedImages+0;
-  cm = (sp->ImageDesc.ColorMap ? sp->ImageDesc.ColorMap : giff->SColorMap);
-  img=new Image::Indexed(sp->ImageDesc.Width, sp->ImageDesc.Height, cm->ColorCount, 8);
-  CGIFFF GifColorType *co=cm->Colors, *ce=co+cm->ColorCount;
-  char *p=img->getHeadp();
-  while (co!=ce) { *p++=(char)co->Red; *p++=(char)co->Green; *p++=(char)co->Blue; co++; }
-  // fprintf(stderr, "transp=%d\n", sp->transp);
-  if (sp->transp!=-1) img->setTransp(sp->transp);
-  /* ^^^ comment out this line to ignore transparency of the GIF file */
+    sp=giff->SavedImages+0;
+    cm = (sp->ImageDesc.ColorMap ? sp->ImageDesc.ColorMap : giff->SColorMap);
+    img=new Image::Indexed(sp->ImageDesc.Width, sp->ImageDesc.Height, cm->ColorCount, 8);
+    CGIFFF GifColorType *co=cm->Colors, *ce=co+cm->ColorCount;
+    char *p=img->getHeadp();
+    while (co!=ce)
+    {
+        *p++=(char)co->Red;
+        *p++=(char)co->Green;
+        *p++=(char)co->Blue;
+        co++;
+    }
+    // fprintf(stderr, "transp=%d\n", sp->transp);
+    if (sp->transp!=-1) img->setTransp(sp->transp);
+    /* ^^^ comment out this line to ignore transparency of the GIF file */
 
-  assert(1L*sp->ImageDesc.Width*sp->ImageDesc.Height<=img->end_()-img->getRowbeg());
-  memcpy(img->getRowbeg(), sp->RasterBits, (slen_t)sp->ImageDesc.Width*sp->ImageDesc.Height);
+    assert(1L*sp->ImageDesc.Width*sp->ImageDesc.Height<=img->end_()-img->getRowbeg());
+    memcpy(img->getRowbeg(), sp->RasterBits, (slen_t)sp->ImageDesc.Width*sp->ImageDesc.Height);
 
-  CGIFFF DGifCloseFile(giff); /* also frees memory structure */
+    CGIFFF DGifCloseFile(giff); /* also frees memory structure */
 
-  return img;
+    return img;
 }
 
-static Image::Loader::reader_t in_gif_checker(char buf[Image::Loader::MAGIC_LEN], char [Image::Loader::MAGIC_LEN], SimBuffer::Flat const&, Image::Loader::UFD*) {
-  return (0==memcmp(buf,"GIF87a",6) || 0==memcmp(buf,"GIF89a",6)) ? in_gif_reader : 0;
+static Image::Loader::reader_t in_gif_checker(char buf[Image::Loader::MAGIC_LEN], char [Image::Loader::MAGIC_LEN], SimBuffer::Flat const&, Image::Loader::UFD*)
+{
+    return (0==memcmp(buf,"GIF87a",6) || 0==memcmp(buf,"GIF89a",6)) ? in_gif_reader : 0;
 }
 
 #define in_gif_name "GIF"
@@ -92,11 +102,13 @@ static Image::Loader::reader_t in_gif_checker(char buf[Image::Loader::MAGIC_LEN]
 #include "error.hpp"
 #define in_gif_name (char const*)NULLP
 /* #define in_gif_checker (Image::Loader::checker_t)NULLP */
-static Image::Loader::reader_t in_gif_checker(char buf[Image::Loader::MAGIC_LEN], char [Image::Loader::MAGIC_LEN], SimBuffer::Flat const&, Image::Loader::UFD*) {
-  if (0==memcmp(buf,"GIF87a",6) || 0==memcmp(buf,"GIF89a",6)) {
-    Error::sev(Error::WARNING) << "loader: please `configure --enable-gif' for loading GIF files" << (Error*)0;
-  }
-  return 0;
+static Image::Loader::reader_t in_gif_checker(char buf[Image::Loader::MAGIC_LEN], char [Image::Loader::MAGIC_LEN], SimBuffer::Flat const&, Image::Loader::UFD*)
+{
+    if (0==memcmp(buf,"GIF87a",6) || 0==memcmp(buf,"GIF89a",6))
+    {
+        Error::sev(Error::WARNING) << "loader: please `configure --enable-gif' for loading GIF files" << (Error*)0;
+    }
+    return 0;
 }
 #endif /* USE_IN_GIF */
 

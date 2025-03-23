@@ -30,11 +30,12 @@ typedef unsigned at_dimen_t; /**** pts ****/
 
 /* #include "autotrace.h" */
 typedef char *at_string;
-typedef struct _at_bitmap_type {
-  at_dimen_t height;
-  at_dimen_t width;
-  unsigned char *bitmap;
-  unsigned int np;
+typedef struct _at_bitmap_type
+{
+    at_dimen_t height;
+    at_dimen_t width;
+    unsigned char *bitmap;
+    unsigned int np;
 } at_bitmap_type;
 
 #include <stdio.h>

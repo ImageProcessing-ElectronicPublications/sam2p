@@ -17,11 +17,24 @@ void* __builtin_vec_new XMALLOC_CODE()
 void  __builtin_vec_delete XFREE_CODE()
 void* __builtin_new XMALLOC_CODE()
 void  __builtin_delete XFREE_CODE()
-void  __rtti_user() { abort(); }
-void  __rtti_si() { abort(); }
-void  terminate() { abort(); }
+void  __rtti_user()
+{
+    abort();
+}
+void  __rtti_si()
+{
+    abort();
+}
+void  terminate()
+{
+    abort();
+}
 /* void* __pure_virtual=0; -- doesn't work */
-extern "C" void __pure_virtual(); void __pure_virtual() { abort(); }
+extern "C" void __pure_virtual();
+void __pure_virtual()
+{
+    abort();
+}
 
 #else
 
@@ -31,19 +44,23 @@ extern "C" void __pure_virtual(); void __pure_virtual() { abort(); }
  *   works for g++-4.2.1 and g++-4.4.1 as well
  *   removed dependency on stdio, so we get more reliable OOM reporting
  */
-static void* emulate_cc_new(size_t len) { \
-  void *p = malloc(len);
-  if (p == 0) {
-    /* Don't use stdio (e.g. fputs), because that may want to allocate more
-     * memory.
-     */
-    (void)!write(2, "out of memory\n", 14);
-    abort();
-  }
-  return p;
+static void* emulate_cc_new(size_t len)
+{
+    \
+    void *p = malloc(len);
+    if (p == 0)
+    {
+        /* Don't use stdio (e.g. fputs), because that may want to allocate more
+         * memory.
+         */
+        (void)!write(2, "out of memory\n", 14);
+        abort();
+    }
+    return p;
 }
-static void emulate_cc_delete(void* p) {
-  if (p!=0) free(p);
+static void emulate_cc_delete(void* p)
+{
+    if (p!=0) free(p);
 }
 #if USE_ATTRIBUTE_ALIAS
 void* operator new  (size_t len) __attribute__((alias("emulate_cc_new")));
@@ -51,10 +68,22 @@ void* operator new[](size_t len) __attribute__((alias("emulate_cc_new")));
 void  operator delete  (void* p)   __attribute__((alias("emulate_cc_delete")));
 void  operator delete[](void* p)   __attribute__((alias("emulate_cc_delete")));
 #else  /* Darwin o32-clang doesn't have it. */
-void* operator new  (size_t len) { return emulate_cc_new(len); }
-void* operator new[](size_t len) { return emulate_cc_new(len); }
-void  operator delete  (void* p) { return emulate_cc_delete(p); }
-void  operator delete[](void* p) { return emulate_cc_delete(p); }
+void* operator new  (size_t len)
+{
+    return emulate_cc_new(len);
+}
+void* operator new[](size_t len)
+{
+    return emulate_cc_new(len);
+}
+void  operator delete  (void* p)
+{
+    return emulate_cc_delete(p);
+}
+void  operator delete[](void* p)
+{
+    return emulate_cc_delete(p);
+}
 #endif
 
 void* __cxa_pure_virtual = 0;

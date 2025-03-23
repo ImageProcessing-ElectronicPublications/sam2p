@@ -15,20 +15,23 @@
 extern "C" {
 #endif
 
-static void* emulate_cc_new(size_t len) {
-  void *p = malloc(len);
-  if (p == 0) {
-    /* Don't use stdio (e.g. fputs), because that may want to allocate more
-     * memory.
-     */
-    (void)!write(2, "out of memory\n", 14);
-    abort();
-  }
-  return p;
+static void* emulate_cc_new(size_t len)
+{
+    void *p = malloc(len);
+    if (p == 0)
+    {
+        /* Don't use stdio (e.g. fputs), because that may want to allocate more
+         * memory.
+         */
+        (void)!write(2, "out of memory\n", 14);
+        abort();
+    }
+    return p;
 }
 
-static void emulate_cc_delete(void* p) {
-  free(p);
+static void emulate_cc_delete(void* p)
+{
+    free(p);
 }
 
 void* _Znwm /*operator new   amd64*/(size_t len) __attribute__((alias("emulate_cc_new")));
@@ -43,9 +46,10 @@ void  _ZdlPvj/*operator delete   i386*/(void* p, unsigned int) __attribute__((al
 void  _ZdaPvj/*operator delete[] i386*/(void* p, unsigned int) __attribute__((alias("emulate_cc_delete")));
 
 /* See https://libcxxabi.llvm.org/spec.html */
-__attribute__((noreturn)) void __cxa_pure_virtual(void) {
-  (void)!write(2, "pure virtual method called\n", 27);
-  abort();
+__attribute__((noreturn)) void __cxa_pure_virtual(void)
+{
+    (void)!write(2, "pure virtual method called\n", 27);
+    abort();
 }
 
 /* No need to implement __cxa_atexit, it's part of glibc and xstatic uClibc as

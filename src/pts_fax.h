@@ -62,18 +62,18 @@ Free Software Foundation, Inc., 59 Temple Place Suite 330, Boston, MA
  * ^^^ should define const
  */
 #if 0 /* example for Linux i386 gcc 2.95: */
-  #define SIZEOF_INT 4
-  #if ((defined(__STDC__) || defined(__PROTOTYPES__)) && !defined(NO_PROTO)) || defined(__cplusplus)
-  # define _(args) args
-  # define OF(args) args
-  # define ___(arg2s,arg1s,argafter) arg2s /* Dat: no direct comma allowed in args :-( */
-  #else
-  # define _(args) ()
-  # define OF(args) ()
-  # define ___(arg2s,arg1s,argafter) arg1s argafter /* Dat: no direct comma allowed in args :-( */
-  #endif
-  #define USE_BUILTIN_FAXE 1
-  #define USE_BUILITN_FAXD 1
+#define SIZEOF_INT 4
+#if ((defined(__STDC__) || defined(__PROTOTYPES__)) && !defined(NO_PROTO)) || defined(__cplusplus)
+# define _(args) args
+# define OF(args) args
+# define ___(arg2s,arg1s,argafter) arg2s /* Dat: no direct comma allowed in args :-( */
+#else
+# define _(args) ()
+# define OF(args) ()
+# define ___(arg2s,arg1s,argafter) arg1s argafter /* Dat: no direct comma allowed in args :-( */
+#endif
+#define USE_BUILTIN_FAXE 1
+#define USE_BUILITN_FAXD 1
 #endif
 
 typedef void (*gssss_memset_t)(void *s, int c, unsigned n); /* Imp: not `unsigned' len */
@@ -137,17 +137,20 @@ typedef struct stream_template_s stream_template;
  * We lay them out this way so that we can alias
  * the write pointer and the read limit.
  */
-typedef struct stream_cursor_read_s {
+typedef struct stream_cursor_read_s
+{
     const unsigned char *ptr;
     const unsigned char *limit;
     unsigned char *_skip;
 } stream_cursor_read;
-typedef struct stream_cursor_write_s {
+typedef struct stream_cursor_write_s
+{
     const unsigned char *_skip;
     unsigned char *ptr;
     unsigned char *limit;
 } stream_cursor_write;
-typedef union stream_cursor_s {
+typedef union stream_cursor_s
+{
     stream_cursor_read r;
     stream_cursor_write w;
 } stream_cursor;
@@ -219,7 +222,8 @@ stream_proc_report_error(s_no_report_error);
 	stream_proc_report_error((*report_error));\
         int min_left; /* required bytes for lookahead */ \
 	char error_string[STREAM_MAX_ERROR_STRING + 1]
-struct stream_state_s {
+struct stream_state_s
+{
     stream_state_common;
 };
 
@@ -332,7 +336,8 @@ struct stream_state_s {
  * (It may make progress even if this condition is not met, but this is
  * not guaranteed.)
  */
-struct stream_template_s {
+struct stream_template_s
+{
 
     /* Define the structure type for the stream state. */
     /* gs_memory_type_ptr_t stype; */ /**** pts ****/
@@ -363,7 +368,8 @@ struct stream_template_s {
 
 #if 0
 /* Hex decoding utility procedure */
-typedef enum {
+typedef enum
+{
     hex_ignore_garbage = 0,
     hex_ignore_whitespace = 1,
     hex_ignore_leading_whitespace = 2
@@ -395,7 +401,8 @@ int s_hex_process _((stream_cursor_read *, stream_cursor_write *, int *, hex_syn
 	int bits_left		/* # of valid low bits (input) or */\
 				/* unused low bits (output) in above, */\
 				/* 0 <= bits_left <= 7 */
-typedef struct stream_hc_state_s {
+typedef struct stream_hc_state_s
+{
     stream_hc_state_common;
 } stream_hc_state;
 
@@ -422,7 +429,8 @@ typedef struct stream_hc_state_s {
 		/* The following are updated dynamically. */\
 	int k_left		/* number of next rows to encode in 2-D */\
 				/* (only if K > 0) */
-typedef struct stream_CF_state_s {
+typedef struct stream_CF_state_s
+{
     stream_CF_state_common;
 } stream_CF_state;
 
@@ -445,7 +453,8 @@ typedef struct stream_CF_state_s {
    (ss)->lbuf = 0, (ss)->lprev = 0)
 
 /* CCITTFaxEncode */
-typedef struct stream_CFE_state_s {
+typedef struct stream_CFE_state_s
+{
     stream_CF_state_common;
     /* The init procedure sets the following. */
     int max_code_bytes;		/* max # of bytes for an encoded line */
@@ -477,7 +486,8 @@ const stream_template s_CFE_template;
 #endif
 
 /* CCITTFaxDecode */
-typedef struct stream_CFD_state_s {
+typedef struct stream_CFD_state_s
+{
     stream_CF_state_common;
     int cbit;			/* bits left to fill in current decoded */
     /* unsigned char at lbuf[wpos] (0..7) */

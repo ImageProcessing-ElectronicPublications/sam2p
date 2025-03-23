@@ -39,13 +39,13 @@
 #endif
 
 #if SIZEOF_CHAR_P!=SIZEOF_LONG && SIZEOF_INT>=4
-  typedef unsigned slen_t;
-  typedef signed slendiff_t;
+typedef unsigned slen_t;
+typedef signed slendiff_t;
 # define SIZEOF_SLEN_T SIZEOF_INT
 # define SLEN_P ""
 #else
-  typedef unsigned long slen_t;
-  typedef signed   long slendiff_t;
+typedef unsigned long slen_t;
+typedef signed   long slendiff_t;
 # define SIZEOF_SLEN_T SIZEOF_LONG
 # define SLEN_P "l"
 #endif
@@ -191,13 +191,13 @@
 #elif HAVE_PTS_STDC
 #  error malloc() not found
 #elif HAVE_PROTOTYPES
-  void *malloc(PTS_size_t size);
-  void *realloc(void *ptr, PTS_size_t size);
-  void free(void *ptr);
+void *malloc(PTS_size_t size);
+void *realloc(void *ptr, PTS_size_t size);
+void free(void *ptr);
 #else
-  void *malloc();
-  void *realloc();
-  void free();
+void *malloc();
+void *realloc();
+void free();
 #endif
 #endif
 
@@ -216,7 +216,7 @@
 #elif HAVE_ALLOCA_H
 # include <alloca.h>
 #elif defined(_AIX)
- #pragma alloca /* indented to avoid choking of pre-ANSI compilers */
+#pragma alloca /* indented to avoid choking of pre-ANSI compilers */
 #elif !defined alloca /* predefined by HP cc +Olibcalls */
 char *alloca ();
 #endif

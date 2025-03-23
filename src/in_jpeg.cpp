@@ -19,17 +19,19 @@
 #include <string.h> /* memchr() */
 #include <stdio.h> /* printf() */
 
-static Image::Sampled *in_jpeg_reader(Image::Loader::UFD *ufd, SimBuffer::Flat const&) {
-  // Error::sev(Error::EERROR) << "Cannot load JPEG images yet." << (Error*)0;
-  HelperE helper("djpeg"); /* Run external process `djpeg' to convert JPEG -> PNM */
-  Encoder::writeFrom(*(Filter::PipeE*)&helper, *(Filter::UngetFILED*)ufd);
-  ((Filter::PipeE*)&helper)->vi_write(0,0); /* Signal EOF */
-  return helper.getImg();
+static Image::Sampled *in_jpeg_reader(Image::Loader::UFD *ufd, SimBuffer::Flat const&)
+{
+    // Error::sev(Error::EERROR) << "Cannot load JPEG images yet." << (Error*)0;
+    HelperE helper("djpeg"); /* Run external process `djpeg' to convert JPEG -> PNM */
+    Encoder::writeFrom(*(Filter::PipeE*)&helper, *(Filter::UngetFILED*)ufd);
+    ((Filter::PipeE*)&helper)->vi_write(0,0); /* Signal EOF */
+    return helper.getImg();
 }
 
-static Image::Loader::reader_t in_jpeg_checker(char buf[Image::Loader::MAGIC_LEN], char [Image::Loader::MAGIC_LEN], SimBuffer::Flat const& loadHints, Image::Loader::UFD*) {
-  return (0==memcmp(buf, "\xff\xd8", 2)) && loadHints.findFirst((char const*)",asis,",6)==loadHints.getLength()
-         ? in_jpeg_reader : 0;
+static Image::Loader::reader_t in_jpeg_checker(char buf[Image::Loader::MAGIC_LEN], char [Image::Loader::MAGIC_LEN], SimBuffer::Flat const& loadHints, Image::Loader::UFD*)
+{
+    return (0==memcmp(buf, "\xff\xd8", 2)) && loadHints.findFirst((char const*)",asis,",6)==loadHints.getLength()
+           ? in_jpeg_reader : 0;
 }
 
 #else

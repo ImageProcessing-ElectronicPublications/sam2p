@@ -33,23 +33,24 @@ typedef	unsigned char tidataval_t;	/* internal image data value type */
 typedef	unsigned int tsize_t;		/* i/o size in bytes */
 typedef int  (*tiwriter_t) OF((char *block, unsigned len, void *zfile));
 struct pts_lzw_state;
-struct pts_lzw_state {
-	/*FILE*/void*	tif_sout;       /**** pts ****/ /* for encode */
-	tiwriter_t     tif_writer;
-        int (*tif_feeder)(char *readbuf, unsigned readlen, struct pts_lzw_state *tif);
+struct pts_lzw_state
+{
+    /*FILE*/void*	tif_sout;       /**** pts ****/ /* for encode */
+    tiwriter_t     tif_writer;
+    int (*tif_feeder)(char *readbuf, unsigned readlen, struct pts_lzw_state *tif);
 #if 0
-	tbool_t		tif_revbits_p;  /**** pts ****/
+    tbool_t		tif_revbits_p;  /**** pts ****/
 #endif
-	tbool_t		tif_reading_p;  /**** pts ****/
-	char PTS_const*	tif_name;	/* name of open file, used for debugging */
-/* compression scheme hooks */
-	tidataval_t*	tif_data;	/* compression scheme private data */
-/* input/output buffering */
-        tidataval_t*    tif_rawend;     /**** pts ****/
-	tidataval_t*	tif_rawdata;	/* raw data buffer */
-	tsize_t		tif_rawdatasize;/* # of bytes in raw data buffer */
-	tidataval_t*	tif_rawcp;	/* current spot in raw buffer */
-	tsize_t		tif_rawcc;	/* bytes unread from raw buffer */
+    tbool_t		tif_reading_p;  /**** pts ****/
+    char PTS_const*	tif_name;	/* name of open file, used for debugging */
+    /* compression scheme hooks */
+    tidataval_t*	tif_data;	/* compression scheme private data */
+    /* input/output buffering */
+    tidataval_t*    tif_rawend;     /**** pts ****/
+    tidataval_t*	tif_rawdata;	/* raw data buffer */
+    tsize_t		tif_rawdatasize;/* # of bytes in raw data buffer */
+    tidataval_t*	tif_rawcp;	/* current spot in raw buffer */
+    tsize_t		tif_rawcc;	/* bytes unread from raw buffer */
 };
 
 extern

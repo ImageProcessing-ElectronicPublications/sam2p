@@ -56,7 +56,8 @@
 
 struct zlib_internal_state; /**** pts ****/ /* Dat: was: internal_state */
 
-typedef struct z_stream_s {
+typedef struct z_stream_s
+{
     unsigned char *next_in;   /* next input byte */
     unsigned int     avail_in;  /* number of bytes available at next_in */
     unsigned long    total_in;  /* total nb of input bytes read so far */
@@ -87,11 +88,11 @@ EXTERN_C int zlib_deflateEnd (z_stream* strm);
 EXTERN_C int zlib_deflateParams (z_stream* strm, int level, int strategy);
 
 EXTERN_C int zlib_deflateInit_ (z_stream* strm, int level,
-                                     const char *version, int stream_size);
+                                const char *version, int stream_size);
 EXTERN_C int zlib_deflateInit2_ (z_stream* strm, int  level, int  method,
-                                      int windowBits, int memLevel,
-                                      int strategy, const char *version,
-                                      int stream_size);
+                                 int windowBits, int memLevel,
+                                 int strategy, const char *version,
+                                 int stream_size);
 #define zlib_deflateInit(strm, level) \
         zlib_deflateInit_((strm), (level), ZLIB_VERSION, sizeof(z_stream))
 #define zlib_deflateInit2(strm, level, method, windowBits, memLevel, strategy) \
